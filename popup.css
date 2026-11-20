@@ -6,22 +6,28 @@
   --selected: color-mix(in srgb, CanvasText 9%, Canvas);
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: Canvas; }
+body { margin: 0; background: Canvas; }
+dialog, body > main {
+  --search-height: max(44px, 2.75em);
+  --picker-top: max(8px, min(calc(var(--center-y, 50vh) - var(--search-height)), calc(100vh - var(--search-height) - 96px)));
+  position: fixed; inset: var(--picker-top) 0 auto; margin: 0 auto;
+  max-height: calc(100vh - var(--picker-top) - 8px);
+}
 dialog {
-  position: fixed; inset: 0; margin: auto; padding: 0; border: 0;
-  width: clamp(520px, 48vw, 840px); max-width: calc(100vw - 32px); max-height: calc(100vh - 24px);
+  padding: 0; border: 0;
+  width: clamp(520px, 48vw, 840px); max-width: calc(100vw - 32px);
   border-radius: 20px; color: CanvasText; background: Canvas;
   box-shadow: 0 18px 60px rgb(0 0 0 / 24%), 0 0 0 1px var(--line);
   direction: ltr; text-align: start; writing-mode: horizontal-tb;
 }
 dialog::backdrop { background: rgb(18 19 22 / 20%); }
-main { width: 100%; min-width: 0; overflow: hidden; border-radius: 20px; background: Canvas; }
+main { display: flex; flex-direction: column; max-height: inherit; width: 100%; min-width: 0; overflow: hidden; border-radius: 20px; background: Canvas; }
 body > main { width: clamp(520px, calc(100vw - 40px), 840px); max-width: calc(100vw - 20px); border: 1px solid var(--line); }
 .symbols { position: absolute; width: 0; height: 0; overflow: hidden; }
 svg { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.search { display: flex; align-items: center; gap: 11px; margin: 0 14px; padding: 13px 4px; border-bottom: 1px solid var(--line); color: var(--ink); }
+.search { height: var(--search-height); flex: none; display: flex; align-items: center; gap: 11px; margin: 0 14px; padding: 0 4px; border-bottom: 1px solid var(--line); color: var(--ink); }
 input { width: 100%; border: 0; outline: 0; background: transparent; color: CanvasText; font: inherit; }
-#results { max-height: min(356px, calc(100vh - 128px)); overflow-y: auto; scrollbar-width: thin; padding: 5px; }
+#results { max-height: 356px; overflow-y: auto; scrollbar-width: thin; padding: 5px; }
 [role=option] { cursor: pointer; gap: 9px; display: flex; align-items: center; min-height: 44px; padding: 4px 12px; border-radius: 12px; }
 [aria-selected=true] { background: var(--selected); }
 [role=option]:hover { background: var(--selected); }

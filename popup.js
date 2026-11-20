@@ -181,20 +181,17 @@ export async function openOverlay(markup, css) {
   try {
     dialog.showModal();
     // Center on Zen's window, accounting for the sidebar and toolbars.
-    // Keep the entire dialog inside the page when space is limited.
     function center() {
       const offset = (delta, room) => Math.sign(delta) * Math.min(Math.abs(delta), Math.max(0, room / 2));
       const dx = window.screenX + window.outerWidth / 2 - window.mozInnerScreenX - window.innerWidth / 2;
-      const dy = window.screenY + window.outerHeight / 2 - window.mozInnerScreenY - window.innerHeight / 2;
-      dialog.style.translate = offset(dx, window.innerWidth - dialog.offsetWidth - 16) + "px " +
-        offset(dy, window.innerHeight - dialog.offsetHeight - 16) + "px";
+      const dy = window.screenY + window.outerHeight / 2 - window.mozInnerScreenY;
+      dialog.style.translate = offset(dx, window.innerWidth - dialog.offsetWidth - 16) + "px";
+      if (Number.isFinite(dy)) dialog.style.setProperty("--center-y", dy + "px");
     }
-    const size = new ResizeObserver(center);
     const onVisibilityChange = () => {
       if (document.hidden) dismiss();
     };
     const dismiss = mount(root, () => {
-      size.disconnect();
       window.removeEventListener("resize", center);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       dialog.close();
@@ -205,7 +202,6 @@ export async function openOverlay(markup, css) {
     });
     activeOverlay = dismiss;
     center();
-    size.observe(dialog);
     document.addEventListener("visibilitychange", onVisibilityChange);
     for (const type of ["keydown", "keyup", "keypress", "input"]) {
       dialog.addEventListener(type, event => event.stopPropagation());

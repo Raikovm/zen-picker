@@ -22,3 +22,5 @@ npx web-ext build --overwrite-dest --ignore-files README.md
 ```
 
 The unsigned zip is written to `web-ext-artifacts/`.
+
+GitHub Actions builds an unsigned ZIP when you push a tag matching the manifest version, such as `v0.1.1` for version `0.1.1`. To build a branch manually, open **Actions → Release build → Run workflow**. Download the ZIP from the run's **Artifacts** section.

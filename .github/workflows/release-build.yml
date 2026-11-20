@@ -1,0 +1,45 @@
+name: Release build
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+
+      - name: Check release tag
+        if: github.ref_type == 'tag'
+        run: |
+          version=$(node -p "require('./manifest.json').version")
+          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::Expected tag v$version for this manifest"
+            exit 1
+          fi
+
+      - name: Validate and package extension
+        run: |
+          src="$RUNNER_TEMP/extension"
+          mkdir -p "$src"
+          cp -r assets manifest.json background.js popup.css popup.html popup.js search.js window-picker.js "$src/"
+          npx --yes web-ext@10.8.0 lint --source-dir "$src" --warnings-as-errors
+          npx --yes web-ext@10.8.0 build --source-dir "$src" --artifacts-dir "$RUNNER_TEMP/dist"
+
+      - name: Upload unsigned extension
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          path: ${{ runner.temp }}/dist/*.zip
+          archive: false
+          if-no-files-found: error

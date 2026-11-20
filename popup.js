@@ -29,12 +29,27 @@ function icon(name) {
   return svg;
 }
 
+function tabIcon(tab) {
+  if (!tab.favIconUrl) return icon("page");
+  const image = document.createElement("img");
+  image.className = "favicon";
+  image.alt = "";
+  image.width = 16;
+  image.height = 16;
+  image.referrerPolicy = "no-referrer";
+  image.addEventListener("error", () => image.replaceWith(icon("page")), { once: true });
+  image.src = tab.favIconUrl;
+  return image;
+}
+
 function mount(root, close) {
   const port = browser.runtime.connect({ name: "zen-picker" });
   let closed = false;
   function dismiss() {
     if (closed) return;
     closed = true;
+    window.removeEventListener("focus", focusQuery);
+    cancelAnimationFrame(focusFrame);
     port.disconnect();
     close();
   }
@@ -70,7 +85,7 @@ function mount(root, close) {
       row.id = "entry-" + index;
       row.setAttribute("role", "option");
       row.setAttribute("aria-selected", "false");
-      row.append(icon(command?.id || (tab.pinned ? "pin" : "page")));
+      row.append(command ? icon(command.id) : tabIcon(tab));
       const details = span("", "details");
       const target = tab || opened;
       const name = target.title || target.url || "Untitled tab";
@@ -133,15 +148,22 @@ function mount(root, close) {
     render(message.message);
   });
   port.onDisconnect.addListener(dismiss);
-  query.focus();
+  function focusQuery() {
+    query.focus({ preventScroll: true });
+  }
+  window.addEventListener("focus", focusQuery);
+  window.focus();
+  focusQuery();
+  const focusFrame = requestAnimationFrame(focusQuery);
   return dismiss;
 }
 
 let activeOverlay;
-export function openOverlay(markup, css) {
+export async function openOverlay(markup, css) {
+  if (document.hidden) return true;
   if (activeOverlay) {
     activeOverlay();
-    return;
+    return true;
   }
   const previous = document.activeElement;
   const host = document.createElement("div");
@@ -194,6 +216,13 @@ export function openOverlay(markup, css) {
       if (event.target === dialog) dismiss();
     });
     window.addEventListener("pagehide", dismiss, { once: true });
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (activeOverlay !== dismiss || document.hidden) return true;
+    // Browser chrome can retain keyboard focus even with a focused DOM input.
+    // Use the standalone picker when Zen keeps focus outside the document.
+    if (document.hasFocus() && root.activeElement === root.getElementById("query")) return true;
+    dismiss();
+    return false;
   } catch (error) {
     host.remove();
     throw error;

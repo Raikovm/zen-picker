@@ -4,7 +4,7 @@ const template = Promise.all(["popup.html", "popup.css"].map(async path =>
 
 async function showOverlay(markup, css) {
   const { openOverlay } = await import(browser.runtime.getURL("popup.js"));
-  openOverlay(markup, css);
+  return openOverlay(markup, css);
 }
 
 browser.action.onClicked.addListener(async tab => {
@@ -13,21 +13,24 @@ browser.action.onClicked.addListener(async tab => {
     const [result] = await browser.scripting.executeScript({
       target: { tabId: tab.id }, func: showOverlay, args: [markup, css]
     });
-    if (result && !result.error) return;
+    if (result?.result === true) return;
   } catch {
     // Zen protects internal pages from content-script injection.
   }
   const parent = await browser.windows.get(tab.windowId);
-  const width = Math.min(560, parent.width);
+  // Match the overlay sizing and leave room for the popup frame and margins.
+  const paletteWidth = Math.min(840, Math.max(520, Math.round(parent.width * 0.48)));
+  const width = Math.min(parent.width, paletteWidth + 40);
   const height = Math.min(470, parent.height);
   const url = new URL(browser.runtime.getURL("popup.html"));
   url.searchParams.set("window", tab.windowId);
   url.searchParams.set("tab", tab.id);
-  await browser.windows.create({
+  const picker = await browser.windows.create({
     type: "popup", url: url.href, incognito: tab.incognito, allowScriptsToClose: true,
     width, height, left: Math.round(parent.left + (parent.width - width) / 2),
     top: Math.round(parent.top + (parent.height - height) / 2)
   });
+  await browser.windows.update(picker.id, { focused: true });
 });
 
 browser.runtime.onConnect.addListener(port => {

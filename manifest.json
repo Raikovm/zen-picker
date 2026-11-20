@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Zen Picker",
+  "description": "Find and manage tabs in the current window with the keyboard.",
+  "version": "0.1.0",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "icons": {
+    "64": "assets/icon.svg"
+  },
+  "action": {
+    "default_title": "Open Zen Picker",
+    "default_icon": "assets/icon.svg"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+K"
+      }
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zen-picker@extensions.local",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup.js",
+        "search.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

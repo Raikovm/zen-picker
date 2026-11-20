@@ -12,7 +12,7 @@ Use ↑ and ↓ to choose an entry and Enter to run it, or click it. Close requi
 
 Open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select this project's `manifest.json`. To change the shortcut, open **Manage Extension Shortcuts** from the gear menu in `about:addons`.
 
-The picker uses the tabs permission to list tabs. The activeTab and scripting permissions let it show the palette on the page where you invoke it. Titles and URLs stay in memory. In a Zen 1.24.3b Linux test with two Spaces, the regular tab in the inactive Space did not appear in the picker.
+The picker uses the tabs permission to list tabs. The activeTab and scripting permissions let it show the palette on the page where you invoke it. Titles and URLs stay in memory. 
 
 ## Check and package
 

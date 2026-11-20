@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Zen Picker",
   "description": "Find and manage tabs in the current window with the keyboard.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "permissions": [
     "tabs",
     "activeTab",
